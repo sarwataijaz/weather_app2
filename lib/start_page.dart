@@ -1,9 +1,11 @@
 import 'dart:ui';
-
+import 'package:geolocator/geolocator.dart';
 import 'package:flutter/material.dart';
+import 'package:weather/weather.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:weather_app2/home_screen.dart';
+import 'package:weather_app2/weather_logic.dart';
 
 class StartScreen extends StatefulWidget {
   const StartScreen({super.key});
@@ -13,6 +15,22 @@ class StartScreen extends StatefulWidget {
 }
 
 class _StartScreenState extends State<StartScreen> {
+
+  WeatherLogic weatherLogic = WeatherLogic();
+  Position? _currentPosition;
+  double _latitude = 0.0;
+  double _longitude = 0.0;
+
+  int _temp_current = 0;
+  String cityName = '';
+
+  @override
+  void initState() {
+    super.initState();
+    weatherLogic.getPosition();
+  }
+
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -135,3 +153,4 @@ class _StartScreenState extends State<StartScreen> {
     );
   }
 }
+
