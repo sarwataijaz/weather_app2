@@ -3,26 +3,39 @@ import 'package:intl/intl.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:weather/weather.dart';
+import 'package:weather_app2/search_filter.dart';
 import 'package:weather_app2/weather_logic.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final String? city;
+  const HomeScreen({Key? key, this.city}) : super(key: key);
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
+
 class _HomeScreenState extends State<HomeScreen> {
   Weather? _weather; // Make _weather nullable
   late WeatherLogic _weatherLogic; // Declare _weatherLogic as late
   late Image image;
+  String? _locationDetail;
+
 
   @override
   void initState() {
     super.initState();
-    _weatherLogic = WeatherLogic(); // Initialize _weatherLogic here
-    _initializeFields();
+    if(widget.city==null) {
+      _weatherLogic = WeatherLogic(); // Initialize _weatherLogic here
+      _initializeFields();
+    } else {
+      _locationDetail = widget.city;
+      _weatherLogic = WeatherLogic();
+      _initializeFields();
+      print(_locationDetail);
+    }
   }
 
   void _setWeatherIcon(int code) {
@@ -63,6 +76,8 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -78,13 +93,35 @@ class _HomeScreenState extends State<HomeScreen> {
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                InkWell(
+                  onTap: () {
+                    Navigator.pushReplacement(
+                      context,
+                      PageTransition(
+                        type: PageTransitionType.scale,
+                        alignment: Alignment.center,
+                        // Choose the transition type
+                        child: SearchFilter(),
+                        duration:
+                            Duration(milliseconds: 700), // Optional: Duration
+                      ),
+                    );
+                  },
+                  child: TextField(
+                    style: TextStyle(fontSize: 15),
+                    decoration: InputDecoration(
+                      hintText: 'Search:', // Hint text
+                      enabled: false,
+                      hintStyle: TextStyle(color: Colors.grey, fontSize: 22),
+                      prefixIcon: Icon(Icons.search), // Icon before the text
+                    ),
+                  ),
+                ),
                 Container(
                   padding: EdgeInsets.zero,
-                  width: 244,
-                  height: 220,
-                  child: Center(
-                    child: image
-                  ),
+                  width: 214,
+                  height: 190,
+                  child: Center(child: image),
                 ),
                 Container(
                   padding: EdgeInsets.zero,
@@ -94,15 +131,16 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: EdgeInsets.only(left: 30.0),
                       child: _weather != null // Check if _weather is not null
                           ? Text(
-                        '${_weather!.temperature!.celsius!.round()}°C', // Use null check operator
-                        style: GoogleFonts.poppins(
-                          textStyle: TextStyle(
-                            fontSize: 48,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      )
+                              '${_weather!.temperature!.celsius!.round()}°C',
+                              // Use null check operator
+                              style: GoogleFonts.poppins(
+                                textStyle: TextStyle(
+                                  fontSize: 48,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            )
                           : CircularProgressIndicator(), // Display a loading indicator while waiting for data
                     ),
                   ),
@@ -130,7 +168,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     height: 38,
                     child: Center(
                       child: Text(
-                        DateFormat('EEEE dd •').add_jm().format(_weather!.date!),
+                        DateFormat('EEEE dd •')
+                            .add_jm()
+                            .format(_weather!.date!),
                         style: GoogleFonts.poppins(
                           textStyle: TextStyle(
                               fontSize: 22,
@@ -189,7 +229,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                             fontSize: 17, color: Colors.grey),
                                       ),
                                       Text(
-                                        DateFormat().add_jm().format(_weather!.sunrise!),
+                                        DateFormat()
+                                            .add_jm()
+                                            .format(_weather!.sunrise!),
                                         style: TextStyle(
                                             fontSize: 17, color: Colors.white),
                                       ),
@@ -215,7 +257,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                             fontSize: 17, color: Colors.grey),
                                       ),
                                       Text(
-                                        DateFormat().add_jm().format(_weather!.sunset!),
+                                        DateFormat()
+                                            .add_jm()
+                                            .format(_weather!.sunset!),
                                         style: TextStyle(
                                             fontSize: 17, color: Colors.white),
                                       ),
@@ -340,3 +384,4 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+

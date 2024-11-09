@@ -18,7 +18,6 @@ class WeatherLogic {
       _currentPosition = position;// This will print the actual Position data
       _latitude = position.latitude;
       _longitude = position.longitude;
-      //getWeatherDetails();
     } catch (e) {
       print('Error occurred: $e'); // Handle any errors
     }
@@ -31,13 +30,7 @@ class WeatherLogic {
 
     print(w);
     return w;
-    _temp_current = w.temperature;
-    _cityName = w.areaName;
-    _date = w.date!;
 
-    print(_temp_current?.celsius?.round());
-    print(_cityName);
-    print(DateFormat('EEEE dd •').add_jm().format(w.date!));
   }
 
   /// Determine the current position of the device.
