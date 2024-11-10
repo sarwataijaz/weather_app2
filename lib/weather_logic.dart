@@ -23,12 +23,16 @@ class WeatherLogic {
     }
   }
 
-  Future<Weather> getWeatherDetails() async {
+  Future<Weather> getWeatherDetails([String? city]) async {
 
     WeatherFactory wf = new WeatherFactory("cdda0e5193beb9fd0b86f9f6a53ab3d8", language: Language.ENGLISH);
-    Weather w = await wf.currentWeatherByLocation(_latitude, _longitude);
+    Weather w;
+    if(city != null) {
+      w = await wf.currentWeatherByCityName(city);
+    } else {
+      w = await wf.currentWeatherByLocation(_latitude, _longitude);
+    }
 
-    print(w);
     return w;
 
   }

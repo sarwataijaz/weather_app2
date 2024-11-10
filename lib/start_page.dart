@@ -16,20 +16,31 @@ class StartScreen extends StatefulWidget {
 
 class _StartScreenState extends State<StartScreen> {
 
-  WeatherLogic weatherLogic = WeatherLogic();
-  Position? _currentPosition;
-  double _latitude = 0.0;
-  double _longitude = 0.0;
-
-  int _temp_current = 0;
+  WeatherLogic _weatherLogic = WeatherLogic();
+  Weather? _weather;
   String cityName = '';
+
 
   @override
   void initState() {
     super.initState();
-    weatherLogic.getPosition();
+    _weatherLogic.getPosition();
+    _initializeFields();
   }
 
+
+  Future<void> _initializeFields() async {
+    try {
+      await _weatherLogic.getPosition();
+      Weather? weatherDetails = await _weatherLogic.getWeatherDetails();
+      setState(() {
+        _weather = weatherDetails; // Update the state with the new weather data
+        print(_weather);
+      });
+    } catch (e) {
+      print('Error fetching weather: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -123,7 +134,7 @@ class _StartScreenState extends State<StartScreen> {
                               PageTransition(
                                 type: PageTransitionType.fade,
                                 // Choose the transition type
-                                child: HomeScreen(),
+                                child: HomeScreen(weather: _weather,),
                                 duration: Duration(
                                     milliseconds: 700), // Optional: Duration
                               ),

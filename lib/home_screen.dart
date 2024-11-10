@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 import 'package:intl/intl.dart';
 import 'package:flutter/cupertino.dart';
@@ -10,7 +11,9 @@ import 'package:weather_app2/weather_logic.dart';
 
 class HomeScreen extends StatefulWidget {
   final String? city;
-  const HomeScreen({Key? key, this.city}) : super(key: key);
+  final Weather? weather;
+
+  const HomeScreen({Key? key, this.city, this.weather}) : super(key: key);
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -23,19 +26,20 @@ class _HomeScreenState extends State<HomeScreen> {
   late Image image;
   String? _locationDetail;
 
+  final StreamController<Image> _imageStreamController = StreamController<Image>();
 
   @override
   void initState() {
     super.initState();
-    if(widget.city==null) {
-      _weatherLogic = WeatherLogic(); // Initialize _weatherLogic here
-      _initializeFields();
-    } else {
-      _locationDetail = widget.city;
-      _weatherLogic = WeatherLogic();
-      _initializeFields();
-      print(_locationDetail);
-    }
+      _weather = widget.weather;
+      _setWeatherIcon(_weather?.weatherConditionCode ?? 801);
+    //  _initializeFields();
+
+  }
+  @override
+  void dispose() {
+    _imageStreamController.close();
+    super.dispose();
   }
 
   void _setWeatherIcon(int code) {
@@ -43,37 +47,31 @@ class _HomeScreenState extends State<HomeScreen> {
       switch (code) {
         case >= 200 && < 300:
           image = Image.asset('assets/1.png');
+          break;
         case >= 300 && < 400:
           image = Image.asset('assets/2.png');
+          break;
         case >= 500 && < 600:
           image = Image.asset('assets/3.png');
+          break;
         case >= 600 && < 700:
           image = Image.asset('assets/4.png');
+          break;
         case >= 700 && < 800:
           image = Image.asset('assets/5.png');
+          break;
         case == 800:
           image = Image.asset('assets/6.png');
+          break;
         case > 800 && <= 804:
           image = Image.asset('assets/7.png');
+          break;
         default:
           image = Image.asset('assets/7.png');
+          break;
       }
+      _imageStreamController.add(image);
     });
-  }
-
-
-  Future<void> _initializeFields() async {
-    try {
-      await _weatherLogic.getPosition();
-      Weather? weatherDetails = await _weatherLogic.getWeatherDetails();
-      setState(() {
-        _weather = weatherDetails; // Update the state with the new weather data
-        _setWeatherIcon(_weather?.weatherConditionCode ?? 801);
-        print(_weather);
-      });
-    } catch (e) {
-      print('Error fetching weather: $e');
-    }
   }
 
 
@@ -121,7 +119,22 @@ class _HomeScreenState extends State<HomeScreen> {
                   padding: EdgeInsets.zero,
                   width: 214,
                   height: 190,
-                  child: Center(child: image),
+                  child: Center(
+                      child: StreamBuilder<Image>(
+                        stream: _imageStreamController.stream,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return CircularProgressIndicator(); // Show loading indicator
+                          } else if (snapshot.hasError) {
+                            return CircularProgressIndicator();
+                          } else if (!snapshot.hasData) {
+                            return CircularProgressIndicator();
+                          } else {
+                            return Center(child: snapshot.data);
+                          }
+                        },
+                      ),
+                  ),
                 ),
                 Container(
                   padding: EdgeInsets.zero,

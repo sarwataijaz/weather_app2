@@ -3,7 +3,9 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:weather/weather.dart';
 import 'package:weather_app2/home_screen.dart';
+import 'package:weather_app2/weather_logic.dart';
 
 class SearchFilter extends StatefulWidget {
   const SearchFilter({super.key});
@@ -14,9 +16,12 @@ class SearchFilter extends StatefulWidget {
 
 class _SearchFilterState extends State<SearchFilter> {
 
-  List<String> allCities = ['Karachi', 'Lahore', 'Khairpur', 'Islamabad'];
+  List<String> allCities = ['Hyderabad','Jamshoro', 'Washington, DC, USA','New York, NY, USA', 'Seoul', 'Karachi', 'Lahore', 'Khairpur', 'Islamabad'];
   List<String> cities = [];
   TextEditingController _controller = TextEditingController();
+
+  WeatherLogic _weatherLogic = WeatherLogic();
+  Weather? _weather;
 
   @override
   void initState() {
@@ -61,17 +66,8 @@ class _SearchFilterState extends State<SearchFilter> {
                             title: Text(city),
                             onTap:() {
                               _controller.text = city;
-                              Navigator.pushReplacement(
-                                context,
-                                PageTransition(
-                                  type: PageTransitionType.scale,
-                                  alignment: Alignment.center,
-                                  // Choose the transition type
-                                  child: HomeScreen(city: city),
-                                  duration:
-                                  Duration(milliseconds: 700), // Optional: Duration
-                                ),
-                              );
+                              _fetchWeather();
+                              print('back!');
                             },
                           );
                         }
@@ -83,6 +79,32 @@ class _SearchFilterState extends State<SearchFilter> {
           ),
         ),
     );
+  }
+
+  Future<void> _fetchWeather() async {
+    try {
+      Weather? weatherDetails = await _weatherLogic.getWeatherDetails(_controller.text);
+
+      if (mounted) {
+        setState(() {
+          _weather = weatherDetails; // Update the state with the new weather data
+          print(_weather);
+          Navigator.pushReplacement(
+            context,
+            PageTransition(
+              type: PageTransitionType.scale,
+              alignment: Alignment.center,
+              // Choose the transition type
+              child: HomeScreen(weather: _weather,),
+              duration:
+              Duration(milliseconds: 700), // Optional: Duration
+            ),
+          );
+        });
+      }
+    } catch (e) {
+      print('Error fetching weather: $e');
+    }
   }
 
   void searchCity(String query) {
